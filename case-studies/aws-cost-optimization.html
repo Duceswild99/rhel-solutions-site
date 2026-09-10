@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AWS Cost Optimization — RHEL Solutions</title>
+  <meta name="description" content="How RHEL Solutions reduced a growth-stage company's AWS bill from $45,000 to $25,000 per month through a systematic infrastructure audit." />
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    .cs-hero {
+      background: var(--navy);
+      color: #fff;
+      padding: 80px 0 72px;
+      position: relative;
+      overflow: hidden;
+    }
+    .cs-hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Ccircle cx='40' cy='40' r='2' fill='white' opacity='0.12'/%3E%3Ccircle cx='0' cy='0' r='2' fill='white' opacity='0.12'/%3E%3Ccircle cx='80' cy='0' r='2' fill='white' opacity='0.12'/%3E%3Ccircle cx='0' cy='80' r='2' fill='white' opacity='0.12'/%3E%3Ccircle cx='80' cy='80' r='2' fill='white' opacity='0.12'/%3E%3Cline x1='0' y1='0' x2='40' y2='0' stroke='white' stroke-width='0.6' opacity='0.06'/%3E%3Cline x1='40' y1='0' x2='40' y2='40' stroke='white' stroke-width='0.6' opacity='0.06'/%3E%3Cline x1='0' y1='40' x2='40' y2='40' stroke='white' stroke-width='0.6' opacity='0.06'/%3E%3C/svg%3E");
+      pointer-events: none;
+    }
+    .cs-hero::after {
+      content: '';
+      position: absolute;
+      top: -120px;
+      right: -80px;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(61,191,173,0.1) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .cs-hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 760px;
+    }
+    .cs-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 36px;
+      transition: color 0.15s;
+    }
+    .cs-back:hover { color: var(--teal); }
+    .cs-back svg { flex-shrink: 0; }
+    .cs-label {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--teal);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cs-label::before {
+      content: '';
+      display: block;
+      width: 16px;
+      height: 2px;
+      background: var(--teal);
+    }
+    .cs-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 4vw, 2.75rem);
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      color: #fff;
+      margin-bottom: 20px;
+    }
+    .cs-hero-sub {
+      font-size: 1rem;
+      color: rgba(255,255,255,0.6);
+      line-height: 1.75;
+      max-width: 580px;
+    }
+    .cs-outcome-bar {
+      background: var(--teal-faint);
+      border-top: 1px solid rgba(61,191,173,0.15);
+      border-bottom: 1px solid rgba(61,191,173,0.15);
+      padding: 36px 0;
+    }
+    .cs-outcome-bar .container {
+      display: flex;
+      gap: 48px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .cs-outcome-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .cs-outcome-number {
+      font-family: var(--font-display);
+      font-size: 1.9rem;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+    .cs-outcome-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+    .cs-outcome-divider {
+      width: 1px;
+      height: 40px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+    .cs-body {
+      padding: 80px 0 104px;
+      background: var(--off-white);
+    }
+    .cs-body-inner {
+      display: grid;
+      grid-template-columns: 1fr 280px;
+      gap: 72px;
+      align-items: start;
+    }
+    .cs-content h2 {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--navy);
+      letter-spacing: -0.01em;
+      margin-bottom: 14px;
+      margin-top: 48px;
+      padding-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+    .cs-content h2:first-child { margin-top: 0; padding-top: 0; border-top: none; }
+    .cs-content p {
+      color: var(--text-muted);
+      font-size: 0.97rem;
+      line-height: 1.85;
+      margin-bottom: 16px;
+    }
+    .cs-content p:last-child { margin-bottom: 0; }
+    .cs-findings {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      margin-top: 24px;
+    }
+    .cs-finding {
+      padding: 22px 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+    .cs-finding:last-child { border-bottom: none; }
+    .cs-finding-title {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--navy);
+      margin-bottom: 6px;
+    }
+    .cs-finding-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin: 0;
+    }
+    .cs-finding-badge {
+      display: inline-block;
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--teal);
+      background: var(--teal-faint);
+      border-radius: 4px;
+      padding: 3px 8px;
+      margin-bottom: 8px;
+    }
+    .cs-sidebar {
+      position: sticky;
+      top: 88px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .cs-sidebar-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px 24px;
+    }
+    .cs-sidebar-card h4 {
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-faint);
+      margin-bottom: 16px;
+    }
+    .cs-sidebar-stat {
+      margin-bottom: 16px;
+    }
+    .cs-sidebar-stat:last-child { margin-bottom: 0; }
+    .cs-sidebar-stat .num {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--teal);
+      letter-spacing: -0.02em;
+      line-height: 1;
+      display: block;
+    }
+    .cs-sidebar-stat .lbl {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: block;
+      margin-top: 3px;
+    }
+    .cs-sidebar-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 0;
+    }
+    .cs-cta {
+      background: var(--navy);
+      padding: 72px 0;
+    }
+    .cs-cta-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .cs-cta h3 {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 2.5vw, 1.65rem);
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: -0.02em;
+      max-width: 480px;
+      line-height: 1.25;
+    }
+    .cs-cta h3 em {
+      font-style: normal;
+      color: var(--teal);
+    }
+    @media (max-width: 900px) {
+      .cs-body-inner { grid-template-columns: 1fr; }
+      .cs-sidebar { position: static; }
+      .cs-outcome-bar .container { gap: 32px; }
+      .cs-outcome-divider { display: none; }
+    }
+    @media (max-width: 640px) {
+      .cs-cta-inner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <header class="nav">
+    <div class="container nav-inner">
+      <a href="/" class="nav-logo">
+        <img src="../logo.png" alt="RHEL Solutions" />
+      </a>
+      <nav class="nav-links">
+        <a href="/#services">Services</a>
+        <a href="/#about">About</a>
+        <a href="/#contact" class="btn btn-sm">Get in Touch</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="cs-hero">
+    <div class="container cs-hero-inner">
+      <a href="/" class="cs-back">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+        </svg>
+        RHEL Solutions
+      </a>
+      <p class="cs-label">Case Study</p>
+      <h1>From $45,000 to $25,000 a month.<br />Without touching a line of application code.</h1>
+      <p class="cs-hero-sub">A growth-stage SaaS company had a cloud bill that had grown with the business but never been rationalized. A systematic infrastructure audit found $20,000 a month in recoverable spend hiding in plain sight.</p>
+    </div>
+  </section>
+
+  <!-- OUTCOME BAR -->
+  <div class="cs-outcome-bar">
+    <div class="container">
+      <div class="cs-outcome-item">
+        <span class="cs-outcome-number">$20K/mo</span>
+        <span class="cs-outcome-label">Recurring savings</span>
+      </div>
+      <div class="cs-outcome-divider"></div>
+      <div class="cs-outcome-item">
+        <span class="cs-outcome-number">$240K</span>
+        <span class="cs-outcome-label">Annualized impact</span>
+      </div>
+      <div class="cs-outcome-divider"></div>
+      <div class="cs-outcome-item">
+        <span class="cs-outcome-number">$4K → $10</span>
+        <span class="cs-outcome-label">AWS Config bill, per month</span>
+      </div>
+      <div class="cs-outcome-divider"></div>
+      <div class="cs-outcome-item">
+        <span class="cs-outcome-number">Zero</span>
+        <span class="cs-outcome-label">Application changes required</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- BODY -->
+  <section class="cs-body">
+    <div class="container cs-body-inner">
+
+      <div class="cs-content">
+
+        <h2>Why this happens</h2>
+        <p>Cloud infrastructure that grows organically is almost always optimized for the moment, not the whole. Each decision made sense when it was made — spin up a new VPC for a new environment, enable detailed monitoring to debug a problem, add redundancy to handle a specific incident. Nobody is wrong. But nobody is ever looking at the sum total and asking whether it still makes sense.</p>
+        <p>That gap is where the waste lives. Not in any one decision, but in the accumulation of decisions that were never revisited.</p>
+
+        <h2>What we found</h2>
+        <p>This client had 25 VPCs, most running three NAT Gateways each — including non-production environments where that level of redundancy served no real purpose. The cost was real. The justification had long since expired.</p>
+        <p>More surprising was the AWS Config bill. At $4,000 a month, it was one of the larger line items on the account. The cause: the company relied heavily on spot instances, which by design spin up and terminate constantly. AWS Config was recording every one of those events. Thousands of them. The volume was enormous. The operational value was effectively zero.</p>
+        <p>CloudWatch metrics told a similar story. Detailed, hourly data collection across workloads where daily resolution provided the same operational visibility. More data, same insight, higher cost.</p>
+
+        <div class="cs-findings">
+          <div class="cs-finding">
+            <div class="cs-finding-badge">NAT Gateways</div>
+            <div class="cs-finding-title">25 VPCs, mostly 3 NAT Gateways each</div>
+            <p class="cs-finding-desc">Non-production environments were running full production-grade redundancy with no business requirement to justify it.</p>
+          </div>
+          <div class="cs-finding">
+            <div class="cs-finding-badge">AWS Config</div>
+            <div class="cs-finding-title">$4,000/month recording spot instance churn</div>
+            <p class="cs-finding-desc">Every spot instance launch and termination was being recorded and charged for, generating enormous volume with effectively zero operational value.</p>
+          </div>
+          <div class="cs-finding">
+            <div class="cs-finding-badge">CloudWatch</div>
+            <div class="cs-finding-title">Hourly metrics where daily was sufficient</div>
+            <p class="cs-finding-desc">Detailed collection intervals across workloads where the higher resolution added cost but no operational value.</p>
+          </div>
+        </div>
+
+        <h2>What we changed</h2>
+        <p>NAT Gateway consolidation was straightforward. Non-production environments were reduced to configurations appropriate for their actual risk profile, not carried over from production defaults.</p>
+        <p>For AWS Config, we disabled recording for the specific EC2 resource types generating the churn. The Config bill dropped from $4,000 a month to under $10. The change took an afternoon. The compliance and security configuration recording that actually mattered was untouched.</p>
+        <p>CloudWatch metric collection intervals were adjusted on workloads where the data supported it. Operational visibility remained intact. The team could still see everything they needed to see — just without paying for hourly granularity on systems where nothing meaningful changes hour to hour.</p>
+        <p>Beyond the infrastructure changes, we helped the client take advantage of AWS discounting and flexible commitment options, reducing compute costs without locking the business into infrastructure it might outgrow.</p>
+
+        <h2>The outcome</h2>
+        <p>Monthly AWS spend went from $45,000 to $25,000. $20,000 a month. $240,000 annualized. The engineering team did not change a single line of application code. The infrastructure did not change in any way the end user would notice. The monitoring coverage the team relied on remained intact.</p>
+        <p>The savings were not found in one place. They were found in five or six places, each modest on its own, collectively significant. That is almost always how it works. There is rarely one catastrophic mistake. There is usually a long list of reasonable decisions that were never revisited.</p>
+        <p>That is exactly the kind of audit an internal team rarely has time to do for itself.</p>
+
+      </div>
+
+      <aside class="cs-sidebar">
+        <div class="cs-sidebar-card">
+          <h4>At a Glance</h4>
+          <div class="cs-sidebar-stat">
+            <span class="num">$45K → $25K</span>
+            <span class="lbl">Monthly AWS spend</span>
+          </div>
+          <div class="cs-sidebar-divider"></div>
+          <div class="cs-sidebar-stat">
+            <span class="num">$240K</span>
+            <span class="lbl">Annualized savings</span>
+          </div>
+          <div class="cs-sidebar-divider"></div>
+          <div class="cs-sidebar-stat">
+            <span class="num">$4,000 → $10</span>
+            <span class="lbl">AWS Config monthly cost</span>
+          </div>
+          <div class="cs-sidebar-divider"></div>
+          <div class="cs-sidebar-stat">
+            <span class="num">25 VPCs</span>
+            <span class="lbl">Audited and rationalized</span>
+          </div>
+        </div>
+        <div class="cs-sidebar-card">
+          <h4>Client Profile</h4>
+          <div class="cs-sidebar-stat">
+            <span class="lbl">Growth-stage SaaS company</span>
+          </div>
+          <div class="cs-sidebar-divider"></div>
+          <div class="cs-sidebar-stat">
+            <span class="lbl">Heavy spot instance usage</span>
+          </div>
+          <div class="cs-sidebar-divider"></div>
+          <div class="cs-sidebar-stat">
+            <span class="lbl">Multi-environment AWS footprint</span>
+          </div>
+        </div>
+        <div class="cs-sidebar-card">
+          <h4>Services Involved</h4>
+          <div class="cs-sidebar-stat">
+            <span class="lbl">AWS cost audit</span>
+          </div>
+          <div class="cs-sidebar-stat">
+            <span class="lbl">Infrastructure optimization</span>
+          </div>
+          <div class="cs-sidebar-stat">
+            <span class="lbl">AWS discounting and commitment strategy</span>
+          </div>
+        </div>
+      </aside>
+
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cs-cta">
+    <div class="container cs-cta-inner">
+      <h3>Wondering what's hiding<br />in <em>your</em> AWS bill?</h3>
+      <a href="/#contact" class="btn btn-primary">
+        Let's Find Out
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <script>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          observer.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+
+</body>
+</html>
