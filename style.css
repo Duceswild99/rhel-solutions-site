@@ -21,7 +21,7 @@
 
 /* ── RESET ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 body { font-family: var(--font-body); color: var(--text); background: var(--off-white); line-height: 1.6; -webkit-font-smoothing: antialiased; }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
@@ -202,13 +202,13 @@ a { color: inherit; text-decoration: none; }
   padding: 104px 0;
   background: var(--surface);
 }
-.section-label {
+.section-label.section-label {
   font-family: var(--font-display);
   font-size: 0.75rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--teal);
+  color: var(--text-muted);
   margin-bottom: 12px;
   display: flex;
   align-items: center;
@@ -221,7 +221,7 @@ a { color: inherit; text-decoration: none; }
   height: 2px;
   background: var(--teal);
 }
-.section-title {
+.section-title.section-title {
   font-family: var(--font-display);
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 700;
@@ -230,12 +230,23 @@ a { color: inherit; text-decoration: none; }
   margin-bottom: 12px;
   line-height: 1.2;
 }
-.section-sub {
+.section-sub.section-sub {
   color: var(--text-muted);
   font-size: 1rem;
   margin-bottom: 56px;
   max-width: 500px;
   line-height: 1.7;
+}
+
+/* Any section marked .section-dark automatically gets the navy-section
+   label/title treatment (teal, larger label; white title) — no per-section
+   overrides needed. */
+.section-dark .section-label {
+  color: var(--teal);
+  font-size: 0.97rem;
+}
+.section-dark .section-title {
+  color: #fff;
 }
 .services-grid {
   display: grid;
@@ -318,9 +329,6 @@ a { color: inherit; text-decoration: none; }
   position: relative;
   z-index: 1;
 }
-.why-text .section-label { color: var(--teal); }
-.why-text .section-label::before { background: var(--teal); }
-.why-text .section-title { color: #fff; }
 .why-text p {
   color: rgba(255,255,255,0.65);
   font-size: 0.97rem;
@@ -518,6 +526,59 @@ a { color: inherit; text-decoration: none; }
   transition: color 0.15s;
 }
 .linkedin-link:hover { color: var(--teal-dark); }
+
+/* ── TESTIMONIAL ── */
+.testimonial {
+  padding: 104px 0;
+  background: var(--navy);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+.testimonial::before {
+  content: '';
+  position: absolute;
+  top: -160px;
+  right: -120px;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(61,191,173,0.08) 0%, transparent 65%);
+  pointer-events: none;
+}
+.testimonial-inner {
+  position: relative;
+  z-index: 1;
+}
+.testimonial-inner .section-title {
+  margin-bottom: 32px;
+}
+.testimonial-quote {
+  max-width: 700px;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.65;
+  letter-spacing: -0.01em;
+  color: rgba(255,255,255,0.85);
+  margin-bottom: 24px;
+}
+.testimonial-quote p::before { content: '\201C'; }
+.testimonial-quote p::after { content: '\201D'; }
+.testimonial-attribution {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.testimonial-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--teal);
+}
+.testimonial-role {
+  font-size: 0.85rem;
+  color: rgba(255,255,255,0.5);
+}
 
 /* ── CONTACT ── */
 .contact {
